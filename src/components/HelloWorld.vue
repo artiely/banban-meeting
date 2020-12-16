@@ -169,10 +169,13 @@ export default {
         style: { ...this.style, fontSize: this.fontSize + "px" },
         name: this.name,
       };
-      this.rtm.sendMessage(JSON.stringify(message)).then(() => {
+      setInterval(()=>{
+        this.rtm.sendMessage(JSON.stringify(message)).then(() => {
         this.msgList.push(message);
         // this.message = "";
       });
+      },20)
+      
     },
   },
 };
