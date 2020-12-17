@@ -7,8 +7,8 @@ export default class RTMClient {
   constructor() {
     // Options for joining a channel
     this.option = {
-      appId: "21d0c10aec25420bab36a6b67bc3ad4d",
-      channel: "banban",
+      appId: "e05fb970e72f484992a4dd012e302162",
+      channel: "banban2020",
       uid: _uid,
       token: "",
     };
