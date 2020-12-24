@@ -1,91 +1,49 @@
 <template>
   <div class="hello">
-    <div v-if="!joined">
-      <md-input-item
-        preview-type="text"
-        v-model="name"
-        title="真实姓名或花名"
-        maxlength="8"
-        placeholder="请输入真实姓名或花名"
-        is-title-latent
-        :error="error_name"
-      ></md-input-item>
-      <br />
-      <md-button type="primary" @click="greet">加入</md-button>
-    </div>
-    <div v-else>
-      <md-input-item
-        preview-type="text"
-        v-model="message"
-        title="请输入"
+    <img src="./banner1.png" style="width: 100%; margin-top: 20px" alt="" />
+    <div>
+      <textarea
+        name=""
+        id=""
+        cols="30"
+        rows="10"
         placeholder="请输入"
-        :error="error_message"
-        is-title-latent
-      ></md-input-item>
-      <md-button type="primary" @click="send">发送</md-button>
-
-      <md-button @click="danmuSettingVisible = true">设置弹幕样式</md-button>
-      <md-icon name="message" size="lg"></md-icon>
-      <div
-        class="messageitem"
-        :class="item.uid ? '' : 'active'"
-        v-for="(item, i) in msgList"
-        :key="i"
-      >
-        {{ item.name }}:{{ item.text }}
+        v-model="message"
+        class="input"
+      ></textarea>
+      <div class="btn-group">
+        <div class="btn btn1" @click="danmuSettingVisible = true">弹幕设置</div>
+        <div class="btn btn2" type="primary" @click="send">发送弹幕</div>
       </div>
-      <span ref="link"></span>
     </div>
-    <div
-      ref="danmuArea"
-      id="vs"
-      style="
-        position: fixed;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        right: 0;
-        z-index: -1;
-        background: #fafafa;
-      "
-    ></div>
+    <img src="./banner2.png" class="banner2" alt="" />
+
     <!-- 弹幕设置 -->
-    <md-popup v-model="danmuSettingVisible" position="right">
+    <md-popup v-model="danmuSettingVisible" position="bottom">
       <div
         class="md-example-popup md-example-popup-right"
-        style="height: 100%; width: 300px; background: #fff"
+        style="
+          height: 100%;
+          background: #fff;
+          border-top-left-radius: 40px;
+          border-top-right-radius: 40px;
+          overflow: hidden;
+        "
       >
-        样式
-
         <md-field>
-          <md-cell-item title="弹幕颜色">
-            <input
-              type="color"
-              class="color"
-              v-model="style.color"
-              slot="right"
-            />
-          </md-cell-item>
-          <md-cell-item title="弹幕背景">
-            <input
-              type="color"
-              class="color"
-              v-model="style.background"
-              slot="right"
-            />
-          </md-cell-item>
-          <md-cell-item title="弹幕大小" brief="滑动下方卡尺设置">
-            <span slot="right">{{ fontSize }}</span>
-          </md-cell-item>
-          <md-ruler
-            :scope="[10, 40]"
-            :step="10"
-            :unit="1"
-            :max="40"
-            :min="10"
-            v-model="fontSize"
-          ></md-ruler>
+          <md-radio-list :options="banks" v-model="myBank" icon-size="lg">
+            <template slot-scope="{ option }">
+              <div class="cell-item" :style="{ background: option.background }">
+                <div class="icon"></div>
+                <div class="name" :style="{ color: option.nameColor }">
+                  用户名称
+                </div>
+                <div class="text">未来已来！</div>
+              </div>
+            </template>
+          </md-radio-list>
         </md-field>
+        <div class="bottom-btn" @click="danmuSettingVisible = false">确定</div>
       </div>
     </md-popup>
   </div>
@@ -93,27 +51,24 @@
 
 <script>
 import {
-  Button,
-  InputItem,
-  Icon,
   Popup,
   Field,
   CellItem,
   RadioBox,
   Ruler,
+  RadioList,
+  Toast,
 } from "mand-mobile";
 import RTMClient from "../agora-rtm-client";
 export default {
   name: "HelloWorld",
   components: {
-    "md-button": Button,
-    "md-input-item": InputItem,
-    "md-icon": Icon,
     "md-popup": Popup,
     [Field.name]: Field,
     [CellItem.name]: CellItem,
     [RadioBox.name]: RadioBox,
     [Ruler.name]: Ruler,
+    [RadioList.name]: RadioList,
   },
   data() {
     return {
@@ -127,61 +82,150 @@ export default {
       rtm: null,
       msgList: [],
       danmaku: null,
-      fontSize: 20,
-      style: {
-        color: "#000",
-        background: "transparent",
-        fontSize: "20px",
-        border: "1px solid #337ab7",
-      },
+      myBank: 0,
+      banks: [
+        {
+          value: 0,
+          nameColor: "#FFF000",
+          background: "rgba(0, 0, 0, 0.5)",
+        },
+        {
+          value: 1,
+          nameColor: "#FFA7F9FF",
+          background: "linear-gradient(270deg, #A8DFBE 0%, #7DA7E7 100%)",
+        },
+        {
+          value: 2,
+          nameColor: "#FFF000",
+          background: "linear-gradient(270deg, #FFE1D6 0%, #FF82A7 100%)",
+        },
+        {
+          value: 3,
+          nameColor: "#FFF000",
+          background: "linear-gradient(270deg, #D8B6FF 0%, #1EAE98 100%)",
+        },
+        {
+          value: 4,
+          nameColor: "#FFA7F9FF",
+          background: "linear-gradient(270deg, #FFB9BE 0%, #A9F0DF 100%)",
+        },
+        {
+          value: 5,
+          nameColor: "rgba(146, 99, 70, 1)",
+          background: "linear-gradient(270deg, #FFDB80 0%, #EAA286 100%)",
+        },
+      ],
     };
+  },
+  computed: {
+    style() {
+      return {
+        color: this.banks[this.myBank].nameColor,
+        background: this.banks[this.myBank].background,
+      };
+    },
+  },
+  created() {
+    this.greet();
   },
   methods: {
     greet() {
-      if (this.name == "") {
-        this.error_name = "请认真填写哟";
-        return;
-      }
-      this.error_name = "";
       this.joined = true;
       this.rtm = new RTMClient();
-
       this.rtm.joinChannel();
-
-      this.rtm.on("ChannelMessage", ({ text }, uid) => {
-        let msgobj = JSON.parse(text);
-
-        this.msgList.push({
-          uid: uid,
-          name: msgobj.name,
-          text: msgobj.text,
-        });
-      });
     },
     send() {
       if (!this.message) {
-        this.error_message = "请输入内容哟";
+        Toast.info("请先输入哟");
         return;
       }
       this.error_message = "";
       let message = {
         text: this.message,
-        style: { ...this.style, fontSize: this.fontSize + "px" },
+        style: { ...this.style },
         name: this.name,
       };
-      setInterval(()=>{
-        this.rtm.sendMessage(JSON.stringify(message)).then(() => {
+      this.rtm.sendMessage(JSON.stringify(message)).then(() => {
         this.msgList.push(message);
-        // this.message = "";
+        this.message = "";
+        Toast.succeed("已发送", 1000, false);
       });
-      },20)
-      
     },
   },
 };
 </script>
+<style lang="stylus">
+.md-radio-list {
+  .md-cell-item-body {
+    padding-top: 0 !important;
 
+    &::before {
+      display: none !important;
+    }
+  }
+}
+
+.md-radio.is-checked .md-radio-icon {
+  color: rgba(217, 78, 25, 1) !important;
+}
+</style>
 <style scoped lang="less">
+.bottom-btn {
+  width: 750px;
+  height: 120px;
+  background: #d94e19;
+  border-radius: 40px 40px 0px 0px;
+
+  font-weight: 500;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+}
+.banner2 {
+  width: 100%;
+  display: block;
+  margin: 65px auto;
+}
+.input {
+  width: 600px;
+  height: 150px;
+  margin: 40px auto;
+  display: block;
+  outline: none;
+  border: none;
+  border-radius: 20px;
+  font-size: 28px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+.cell-item {
+  width: 588px;
+  height: 96px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 48px;
+
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  font-weight: 500;
+  .icon {
+    width: 80px;
+    height: 80px;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    margin-left: 8px;
+  }
+  .name {
+    font-size: 28px;
+    padding: 10px;
+  }
+  .text {
+    font-size: 28px;
+    color: #fff;
+  }
+}
 .messageitem {
   font-size: 24px;
   color: #666;
@@ -192,6 +236,36 @@ export default {
 }
 .color {
   flex: 1;
+}
+.hello {
+  background: linear-gradient(0deg, #dc2e22 0%, #d85018 100%);
+  min-height: 100vh;
+  height: 100%;
+  .btn-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+  }
+  .btn {
+    width: 230px;
+    height: 90px;
+    border-radius: 45px;
+    background: #00b5eb;
+    box-shadow: 0 10px 3px 4px #0575c5;
+    font-size: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    &.btn1 {
+      color: #fff;
+    }
+    &.btn2 {
+      color: rgba(68, 23, 9, 1);
+      background: rgb(244 221 89);
+      box-shadow: 0 10px 3px 4px rgb(244 176 35);
+    }
+  }
 }
 .hello h1 {
   color: #333;
